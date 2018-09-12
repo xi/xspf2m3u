@@ -19,6 +19,8 @@ NS = '{http://xspf.org/ns/0/}'
 EXTS = ['mp3', 'ogg', 'opus', 'mp4', 'm4a', 'wav', 'flac', 'wma']
 CHARS = re.compile('[^a-z0-9 ]')
 
+__version__ = '0.0.0'
+
 
 def iter_files(folder):
 	for dirpath, dirnames, filenames in os.walk(folder):
