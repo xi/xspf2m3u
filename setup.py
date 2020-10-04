@@ -21,11 +21,13 @@ setup(
     url='https://github.com/xi/xspf2m3u',
     author='Tobias Bengfort',
     author_email='tobias.bengfort@posteo.de',
-    py_modules=['xspf2m3u'],
+    py_modules=['xspf2m3u', 'm3u2xspf'],
     extras_require={
         'youtube': ['youtube_dl'],
+        'mutagen': ['mutagen'],
     },
     entry_points={'console_scripts': [
         'xspf2m3u=xspf2m3u:main',
+        'm3u2xspf=m3u2xspf:main',
     ]},
     license='GPLv2+')
