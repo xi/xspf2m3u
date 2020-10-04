@@ -74,6 +74,7 @@ def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('src')
 	parser.add_argument('folder')
+	parser.add_argument('-Y', '--youtube', action='store_true')
 	return parser.parse_args()
 
 
@@ -89,7 +90,7 @@ def main():
 			context = [track[k] for k in context_key if track[k]]
 			location = find_by_title(track['title'], context, files)
 
-		if location is None and youtube_dl:
+		if location is None and args.youtube and youtube_dl:
 			location = search_youtube([q for q in track.values() if q])
 
 		if location is None:
