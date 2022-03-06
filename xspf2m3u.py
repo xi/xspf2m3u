@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import sys
 import os
 import re
-import codecs
 import argparse
 from xml.etree import ElementTree
 
@@ -38,8 +36,10 @@ def simp(s):
 def find_by_title(title, fields, files):
 	for dirpath, filename in files:
 		path = os.path.join(dirpath, filename)
-		if (simp(title) in simp(filename) and
-				all(simp(o) in simp(path) for o in fields)):
+		if (
+			simp(title) in simp(filename)
+			and all(simp(o) in simp(path) for o in fields)
+		):
 			return path
 
 
