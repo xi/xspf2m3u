@@ -8,7 +8,10 @@ from xml.etree import ElementTree
 try:
 	import youtube_dl
 
-	ydl = youtube_dl.YoutubeDL(params={'quiet': True})
+	ydl = youtube_dl.YoutubeDL(params={
+		'noplaylist': True,
+		'quiet': True,
+	})
 	ydl_selector = ydl.build_format_selector('bestaudio/best')
 except ImportError:
 	youtube_dl = None
