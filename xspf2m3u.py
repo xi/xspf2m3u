@@ -57,7 +57,12 @@ def search_youtube(q):
 		_format = next(ydl_selector({'formats': info['formats']}))
 	except StopIteration:
 		return None
-	return _format['url']
+	filename = '{}-{}.{}'.format(
+		info['title'].replace('/', '_'),
+		info['id'],
+		_format['ext'],
+	)
+	return _format['url'], filename
 
 
 def iter_tracks(src):
@@ -73,17 +78,29 @@ def iter_tracks(src):
 		yield track
 
 
+def hard_link(location, outdir):
+	os.makedirs(outdir, exist_ok=True)
+	filename = os.path.basename(location)
+	path = os.path.join(outdir, filename)
+	os.link(location, path)
+	return path
+
+
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('src')
 	parser.add_argument('folder')
 	parser.add_argument('-Y', '--youtube', action='store_true')
+	parser.add_argument('-O', '--outdir')
 	return parser.parse_args()
 
 
 def main():
 	args = parse_args()
 	files = list(iter_files(args.folder))
+
+	if args.outdir:
+		os.makedirs(args.outdir)
 
 	for track in iter_tracks(args.src):
 		location = track['location']
@@ -92,9 +109,15 @@ def main():
 			context_key = ['creator', 'annotation']
 			context = [track[k] for k in context_key if track[k]]
 			location = find_by_title(track['title'], context, files)
+			if location and args.outdir:
+				location = hard_link(location, args.outdir)
 
 		if location is None and args.youtube and youtube_dl:
-			location = search_youtube([q for q in track.values() if q])
+			url, filename = search_youtube([q for q in track.values() if q])
+			if args.outdir:
+				location = os.path.join(args.outdir, filename)
+			else:
+				location = url
 
 		if location is None:
 			s = ' - '.join('{}: {}'.format(k, v) for k, v in track.items())
