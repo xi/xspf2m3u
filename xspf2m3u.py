@@ -59,7 +59,7 @@ def iter_files(folder):
 				yield dirpath, filename
 
 
-def simp(s):
+def simplify(s):
 	s = s.lower()
 	s = s.encode('ascii', errors='replace').decode('ascii')
 	return CHARS.sub('', s)
@@ -69,8 +69,8 @@ def find_by_title(title, fields, files):
 	for dirpath, filename in files:
 		path = os.path.join(dirpath, filename)
 		if (
-			simp(title) in simp(filename)
-			and all(simp(o) in simp(path) for o in fields)
+			simplify(title) in simplify(filename)
+			and all(simplify(o) in simplify(path) for o in fields)
 		):
 			return path
 
