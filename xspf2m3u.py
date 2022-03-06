@@ -2,7 +2,10 @@
 
 import os
 import re
+import sys
 import argparse
+import subprocess
+from time import sleep
 from xml.etree import ElementTree
 
 try:
@@ -21,6 +24,32 @@ EXTS = ['mp3', 'ogg', 'opus', 'mp4', 'm4a', 'wav', 'flac', 'wma']
 CHARS = re.compile('[^a-z0-9 ]')
 
 __version__ = '0.0.0'
+
+
+class DownloadPool(set):
+	def log(self, s):
+		print(s, file=sys.stderr, end='\r')
+
+	def download(self, url, path):
+		self.add(subprocess.Popen(['curl', url, '-s', '-o', path]))
+
+	def poll(self):
+		for p in list(self):
+			if p.poll() is not None:
+				self.remove(p)
+		return len(self)
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if exc_type is None:
+			while self.poll():
+				self.log('{} downloads still active'.format(len(self)))
+				sleep(5)
+		else:
+			for p in self:
+				p.kill()
 
 
 def iter_files(folder):
@@ -102,28 +131,30 @@ def main():
 	if args.outdir:
 		os.makedirs(args.outdir)
 
-	for track in iter_tracks(args.src):
-		location = track['location']
+	with DownloadPool() as pool:
+		for track in iter_tracks(args.src):
+			location = track['location']
 
-		if location is None:
-			context_key = ['creator', 'annotation']
-			context = [track[k] for k in context_key if track[k]]
-			location = find_by_title(track['title'], context, files)
-			if location and args.outdir:
-				location = hard_link(location, args.outdir)
+			if location is None:
+				context_key = ['creator', 'annotation']
+				context = [track[k] for k in context_key if track[k]]
+				location = find_by_title(track['title'], context, files)
+				if location and args.outdir:
+					location = hard_link(location, args.outdir)
 
-		if location is None and args.youtube and youtube_dl:
-			url, filename = search_youtube([q for q in track.values() if q])
-			if args.outdir:
-				location = os.path.join(args.outdir, filename)
+			if location is None and args.youtube and youtube_dl:
+				url, filename = search_youtube([q for q in track.values() if q])
+				if args.outdir:
+					location = os.path.join(args.outdir, filename)
+					pool.download(url, location)
+				else:
+					location = url
+
+			if location is None:
+				s = ' - '.join('{}: {}'.format(k, v) for k, v in track.items())
+				print('# Warning: ' + s)
 			else:
-				location = url
-
-		if location is None:
-			s = ' - '.join('{}: {}'.format(k, v) for k, v in track.items())
-			print('# Warning: ' + s)
-		else:
-			print(location)
+				print(location)
 
 
 if __name__ == '__main__':
