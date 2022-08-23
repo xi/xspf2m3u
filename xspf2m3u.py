@@ -80,12 +80,14 @@ def search_youtube(q):
 	try:
 		info = ydl.extract_info('ytsearch:' + ' '.join(q), download=False)
 	except youtube_dl.utils.DownloadError:
-		return None
+		return None, None
+	if not info['entries']:
+		return None, None
 	info = info['entries'][0]
 	try:
 		_format = next(ydl_selector({'formats': info['formats']}))
 	except StopIteration:
-		return None
+		return None, None
 	filename = '{}-{}.{}'.format(
 		info['title'].replace('/', '_'),
 		info['id'],
@@ -144,7 +146,9 @@ def main():
 
 			if location is None and args.youtube and youtube_dl:
 				url, filename = search_youtube([q for q in track.values() if q])
-				if args.outdir:
+				if url is None:
+					location = None
+				elif args.outdir:
 					location = os.path.join(args.outdir, filename)
 					pool.download(url, location)
 				else:
