@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<playlist xmlns="http://xspf.org/ns/0/" xmlns:vlc="http://www.videolan.org/vlc/playlist/ns/0/" version="1">
+	<title>Playlist</title>
+	<trackList>
+		<track>
+			<location>https://www.youmaker.com/v/2GJoyNg88o76</location>
+			<title>China Light Parade in Strasbourg during the 2022 Christmas Market</title>
+			<creator>sos-productions.com</creator>
+			<info>http://media.sos-productions.com/20221210-parade-of-the-light-of-china-strasbourg/</info>
+			<image>https://i0.wp.com/media.sos-productions.com/wp-content/uploads/2022/10/SoS-20221102-Poster-parade-Stras_A3-V5_en-scaled.jpg</image>
+			<duration>686000</duration>
+			<extension application="http://www.videolan.org/vlc/playlist/0">
+				<vlc:id>0</vlc:id>
+			</extension>
+		</track>
+	</trackList>
+	<extension application="http://www.videolan.org/vlc/playlist/0">
+		<vlc:item tid="0"/>
+	</extension>
+</playlist>
