@@ -1,7 +1,7 @@
 xspf2m3u - simple XSPF to M3U conversion
 
 Playlists tend to break whenever you reorder your music collection. The
-`XSPF <http://www.xspf.org/xspf-v1.html>`_ format allows to specify songs by
+`XSPF <https://xspf.org/spec>`_ format allows to specify songs by
 metadata rather than file location, so it theoretically solves that problem.
 Unfortnately, most audio players do not support that format.
 
