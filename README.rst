@@ -18,3 +18,7 @@ dumb. It uses the following strategies:
 Usage::
 
     xspf2m3u input.xspf /my/music > output.m3u
+
+    if you need M3UEXT support, then
+
+    xspf2m3u input.xspf /my/music --target M3UEXT > output.m3u

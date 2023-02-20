@@ -13,6 +13,9 @@ KEYS = {
     'album': 'album',
     'artist': 'creator',
     'title': 'title',
+    #m3uext
+    'image': 'image',
+    'duration' : 'duration'
 }
 
 
@@ -29,16 +32,33 @@ def get_tags(path):
     else:
         return {'location': path}
 
+import re
 
 def iter_lines(path):
     root = os.path.dirname(path)
+    track= {}
+    target = 'M3U'
     with open(sys.argv[1]) as fh:
         for line in fh:
             line = line.rstrip()
-            if line.startswith('#'):
+            if line.startswith('#EXTM3U'):
+                 target = 'M3UEXT'   
+            elif line.startswith('#EXTINF'):
+                matches = re.compile('#EXTINF:(\d*),([^,]+),(?:logo=(.*))?', re.IGNORECASE).findall(line) 
+                duration, title, logo =zip(matches[0])
+                track= { 
+                        'title' : title[0], 
+                        'image' : logo[0],
+                        'duration' : str(int(duration[0])*1000)
+                        }
+            elif line.startswith('#'):
                 pass
             elif line.startswith('http'):
-                yield {'location': line}
+                if target == 'M3UEXT':
+                    track['location'] = line
+                else:
+                    track={'location': line}
+                yield track
             else:
                 if not line.startswith('/'):
                     line = os.path.join(root, line)
