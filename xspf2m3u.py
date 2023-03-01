@@ -98,7 +98,7 @@ def iter_tracks(src):
     root = ElementTree.parse(src).getroot()
     for e in root.iter(NS + 'track'):
         track = {}
-        for tag in ['location', 'title', 'creator', 'album', 'annotation']:
+        for tag in ['location', 'title', 'creator', 'album', 'annotation', 'image', 'duration']:
             field = e.find(NS + tag)
             if field is None:
                 track[tag] = None
@@ -121,11 +121,18 @@ def parse_args():
     parser.add_argument('folder')
     parser.add_argument('-Y', '--youtube', action='store_true')
     parser.add_argument('-O', '--outdir')
+    parser.add_argument('-T', '--target')
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+
+    target = "M3U"
+    if 'target' in  args and args.target == "M3UEXT":
+        target = 'M3UEXT'
+        print("#EXTM3U")
+
     files = list(iter_files(args.folder))
 
     if args.outdir:
@@ -158,7 +165,14 @@ def main():
                 s = ' - '.join('{}: {}'.format(k, v) for k, v in track.items())
                 print('# Warning: ' + s)
             else:
-                print(location)
+                 if target == "M3U":
+                    print(location)
+                 if target == "M3UEXT":
+                    duration = int(track['duration'], 10) // 1000
+                    title = track['title']
+                    logo = track['image']
+                    print("#EXTINF:{},{},logo={}"'{}: {}'.format(str(duration), title ,logo))
+                    print(location)
 
 
 if __name__ == '__main__':

@@ -13,6 +13,9 @@ KEYS = {
     'album': 'album',
     'artist': 'creator',
     'title': 'title',
+    #m3uext
+    'image': 'image',
+    'duration' : 'duration'
 }
 
 
@@ -29,16 +32,56 @@ def get_tags(path):
     else:
         return {'location': path}
 
+import re
 
 def iter_lines(path):
     root = os.path.dirname(path)
+    track= {}
+    target = 'M3U'
     with open(sys.argv[1]) as fh:
         for line in fh:
             line = line.rstrip()
-            if line.startswith('#'):
+            if line.startswith('#EXTM3U'):
+                target = 'M3UEXT'   
+            elif line.startswith('#EXTINF'):
+                duration = -1
+                track={}
+                track['title'] = ''
+                track['image'] = ''
+                pattern = '#EXTINF:(\d*),([^,]+),(?:logo=(.*))?'
+                match = re.fullmatch(pattern, line)
+                if match is not None:
+                        matches = re.compile(matches).findall(line) 
+                        duration, title, logo = zip(matches[0])
+                        duration = int(duration[0])*1000
+                        track['title'] = title[0] 
+                        track['image'] = logo[0]
+                else:
+                        pattern = '#EXTINF:(\d*),([^,]+)'
+                        match = re.fullmatch(pattern, line)
+                        if match is not None:
+                            matches = re.compile(matches).findall(line) 
+                            duration, title = zip(matches[0])
+                            duration = int(duration[0])*1000
+                            track['title'] = title[0]
+                        else:    
+                                pattern = '#EXTINF:(\d*)'
+                                match = re.fullmatch(pattern, line)
+                                if match is not None:
+                                     matches = re.compile(matches).findall(line) 
+                                     duration, title = zip(matches[0])
+                                     duration = int(duration[0])*1000
+                track['duration'] = duration
+            elif line.startswith('#'):
                 pass
             elif line.startswith('http'):
-                yield {'location': line}
+                if target == 'M3UEXT':
+                    if track['title'] == '' :
+                        track['title'] = os.path.basename(line)       
+                    track['location'] = line
+                else:
+                    track={'location': line}
+                yield track
             else:
                 if not line.startswith('/'):
                     line = os.path.join(root, line)
