@@ -21,8 +21,7 @@ NS = '{http://xspf.org/ns/0/}'
 EXTS = ['mp3', 'ogg', 'opus', 'mp4', 'm4a', 'wav', 'flac', 'wma']
 CHARS = re.compile('[^a-z0-9 ]')
 
-#Bump version 0.1.0 with example and M3UEXT support
-__version__ = '0.1.0'
+__version__ = '0.0.0'
 
 
 class DownloadPool(set):
@@ -169,10 +168,10 @@ def main():
                  if target == "M3U":
                     print(location)
                  if target == "M3UEXT":
-                    duration = int(int(track['duration']) / 1000) #I am not sure about this
+                    duration = int(track['duration'], 10) // 1000
                     title = track['title']
                     logo = track['image']
-                    print("#EXTINF:"+str(duration)+","+title+",logo="+logo)
+                    print("#EXTINF:{},{},logo={}"'{}: {}'.format(str(duration), title ,logo))
                     print(location)
 
 
