@@ -39,7 +39,7 @@ def iter_lines(path):
                 pass
             elif line.startswith('http'):
                 yield {'location': line}
-            else:
+            elif line:
                 if not line.startswith('/'):
                     line = os.path.join(root, line)
                 yield get_tags(line)
