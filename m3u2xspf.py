@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import argparse
 from xml.sax.saxutils import escape
@@ -13,6 +14,7 @@ KEYS = {
     'album': 'album',
     'artist': 'creator',
     'title': 'title',
+    'duration': 'duration',
 }
 
 
@@ -30,19 +32,34 @@ def get_tags(path):
         return {'location': path}
 
 
+def parse_extinf(line):
+    match = re.fullmatch(r'#EXTINF:([0-9]+),(.*)', line)
+    extinf = {}
+    if match:
+        extinf['title'] = match[2].strip()
+        if match[1] not in ['0', '-1']:
+            extinf['duration'] = str(int(match[1], 10) * 1000)
+    return extinf
+
+
 def iter_lines(path):
     root = os.path.dirname(path)
+    track = {}
     with open(sys.argv[1]) as fh:
         for line in fh:
             line = line.rstrip()
             if line.startswith('#'):
-                pass
-            elif line.startswith('http'):
-                yield {'location': line}
-            elif line:
-                if not line.startswith('/'):
-                    line = os.path.join(root, line)
-                yield get_tags(line)
+                if line.startswith('#EXTINF:'):
+                    track = parse_extinf(line)
+            else:
+                if line.startswith('http'):
+                    track['location'] = line
+                elif line:
+                    if not line.startswith('/'):
+                        line = os.path.join(root, line)
+                    track.update(get_tags(line))
+                yield track
+                track = {}
 
 
 def parse_args():
